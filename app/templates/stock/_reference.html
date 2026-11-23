@@ -1,0 +1,6 @@
+{# Link from a ledger row to the order or PO that caused it #}
+{% if m.reference_type == 'ORDER' %}
+  <a href="{{ url_for('orders.detail', order_id=m.reference_id) }}">Order #{{ m.reference_id }}</a>
+{% elif m.reference_type == 'PO' %}
+  <a href="{{ url_for('purchases.detail', po_id=m.reference_id) }}">PO #{{ m.reference_id }}</a>
+{% else %}<span class="muted">Manual</span>{% endif %}

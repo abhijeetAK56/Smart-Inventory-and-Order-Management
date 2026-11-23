@@ -1,0 +1,4 @@
+flask>=3.0
+mysql-connector-python>=8.4
+faker>=25.0
+python-dotenv>=1.0

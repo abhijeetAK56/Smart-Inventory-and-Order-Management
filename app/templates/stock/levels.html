@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Stock{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Stock levels</h1></div>
+  <p class="muted">Available = on hand − reserved. Nobody types stock numbers here:
+    stock only changes through the ledger.</p>
+
+  <form method="get" class="filters">
+    <label>Warehouse
+      <select name="warehouse_id"><option value="">All</option>
+        {% for w in warehouses %}<option value="{{ w.warehouse_id }}"
+          {{ 'selected' if request.args.get('warehouse_id') == w.warehouse_id|string }}>{{ w.name }}</option>{% endfor %}
+      </select></label>
+    <label>Category
+      <select name="category_id"><option value="">All</option>
+        {% for c in categories %}<option value="{{ c.category_id }}"
+          {{ 'selected' if request.args.get('category_id') == c.category_id|string }}>{{ c.name }}</option>{% endfor %}
+      </select></label>
+    <label class="checkbox"><input type="checkbox" name="low_only"
+      {{ 'checked' if request.args.get('low_only') }}> Low stock only</label>
+    <button class="btn">Apply</button>
+  </form>
+
+  {% if rows %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>SKU</th><th>Product</th><th>Warehouse</th><th class="num">On hand</th>
+        <th class="num">Reserved</th><th class="num">Available</th><th class="num">Reorder level</th><th></th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr class="{{ 'row-warning' if r.available <= r.reorder_level }}">
+          <td>{{ r.sku }}</td><td>{{ r.product_name }}</td><td>{{ r.warehouse_name }}</td>
+          <td class="num">{{ r.quantity_on_hand }}</td><td class="num">{{ r.quantity_reserved }}</td>
+          <td class="num"><strong>{{ r.available }}</strong></td><td class="num">{{ r.reorder_level }}</td>
+          <td class="links">
+            <a href="{{ url_for('stock.product_history', product_id=r.product_id) }}">History</a>
+            {% if session.role == 'ADMIN' %}
+              <a href="{{ url_for('stock.adjust', product_id=r.product_id, warehouse_id=r.warehouse_id) }}">Adjust</a>
+            {% endif %}
+          </td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="muted">{{ rows|length }} rows</p>
+  {% else %}<p class="empty">No stock rows match these filters.</p>{% endif %}
+{% endblock %}

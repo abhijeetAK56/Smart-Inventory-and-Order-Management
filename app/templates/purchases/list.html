@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Purchase orders{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Purchase orders</h1>
+    <a class="btn btn-primary" href="{{ url_for('purchases.new_po') }}">New purchase order</a></div>
+  <div class="tabs">
+    {% for s in ["", "DRAFT", "ORDERED", "RECEIVED", "CANCELLED"] %}
+      <a href="{{ url_for('purchases.list_pos', status=s) }}"
+         class="{{ 'active' if request.args.get('status', '') == s }}">{{ s or "All" }}</a>
+    {% endfor %}
+  </div>
+  {% if pos %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>PO #</th><th>Date</th><th>Supplier</th><th>Warehouse</th><th class="num">Items</th>
+        <th class="num">Value</th><th>Status</th><th>Received</th><th></th></tr></thead>
+      <tbody>
+      {% for po in pos %}
+        <tr><td>#{{ po.po_id }}</td><td>{{ po.order_date|show_date }}</td><td>{{ po.supplier_name }}</td>
+          <td>{{ po.warehouse_name }}</td><td class="num">{{ po.item_count }}</td>
+          <td class="num">{{ po.total_value|money }}</td><td>{{ badge(po.status) }}</td>
+          <td>{{ po.received_date|show_date }}</td>
+          <td><a href="{{ url_for('purchases.detail', po_id=po.po_id) }}">View</a></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  {% else %}<p class="empty">No purchase orders here yet.</p>{% endif %}
+{% endblock %}

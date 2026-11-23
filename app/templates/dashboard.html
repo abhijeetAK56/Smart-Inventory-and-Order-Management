@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import qty %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Dashboard</h1>
+    <a class="btn btn-primary" href="{{ url_for('orders.new_order') }}">New order</a></div>
+
+  <div class="stats">
+    <a class="stat-card" href="{{ url_for('products.list_products') }}">
+      <span class="stat-number">{{ stats.products }}</span><span class="muted">Active products</span></a>
+    <a class="stat-card stat-warning" href="{{ url_for('reports.low_stock') }}">
+      <span class="stat-number">{{ stats.low_stock }}</span><span class="muted">Low stock rows</span></a>
+    <a class="stat-card" href="{{ url_for('orders.list_orders') }}">
+      <span class="stat-number">{{ stats.open_orders }}</span><span class="muted">Open orders (pending + confirmed)</span></a>
+    <a class="stat-card" href="{{ url_for('reports.daily_sales') }}">
+      <span class="stat-number">{{ stats.sales_month|money }}</span><span class="muted">Sales this month</span></a>
+  </div>
+
+  <div class="two-columns">
+    <section class="card">
+      <h2>Open alerts</h2>
+      {% if alerts %}
+        <table class="table">
+          <thead><tr><th>Product</th><th>Warehouse</th><th class="num">Avail.</th><th class="num">Level</th></tr></thead>
+          <tbody>
+          {% for a in alerts %}
+            <tr><td>{{ a.product_name }}</td><td>{{ a.warehouse_name }}</td>
+              <td class="num">{{ a.available_at_alert }}</td><td class="num">{{ a.reorder_level_at_alert }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}<p class="empty">No open alerts. Stock looks healthy.</p>{% endif %}
+      <a href="{{ url_for('dashboard.alerts') }}">View all alerts</a>
+    </section>
+
+    <section class="card">
+      <h2>Recent movements</h2>
+      <table class="table">
+        <thead><tr><th>Time</th><th>Product</th><th>Type</th><th class="num">Qty</th><th>By</th></tr></thead>
+        <tbody>
+        {% for m in movements %}
+          <tr><td>{{ m.created_at|show_date }}</td>
+            <td><a href="{{ url_for('stock.product_history', product_id=m.product_id) }}">{{ m.product_name }}</a></td>
+            <td>{{ m.movement_type }}</td><td class="num">{{ qty(m.change_qty) }}</td><td>{{ m.username }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <a href="{{ url_for('stock.ledger') }}">View ledger</a>
+    </section>
+  </div>
+{% endblock %}

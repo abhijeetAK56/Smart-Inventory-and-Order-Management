@@ -1,0 +1,66 @@
+{# Small reusable pieces of HTML. Import them with:
+   {% from "_macros.html" import badge, pagination %} #}
+
+{% macro nav_link(endpoint, label) %}
+  <a href="{{ url_for(endpoint) }}"
+     class="{{ 'active' if request.endpoint == endpoint else '' }}">{{ label }}</a>
+{% endmacro %}
+
+{% macro badge(status) %}
+  {% set colors = {
+      "PENDING": "neutral", "DRAFT": "neutral", "STAFF": "neutral",
+      "CONFIRMED": "info", "ORDERED": "info", "ADMIN": "info",
+      "SHIPPED": "success", "RECEIVED": "success", "RESOLVED": "success", "ACTIVE": "success",
+      "CANCELLED": "danger", "INACTIVE": "danger",
+      "OPEN": "warning", "LOW": "warning"} %}
+  <span class="badge badge-{{ colors.get(status, 'neutral') }}">{{ status }}</span>
+{% endmacro %}
+
+{% macro qty(value) %}
+  <span class="{{ 'qty-in' if value > 0 else 'qty-out' }}">{{ '%+d' % value }}</span>
+{% endmacro %}
+
+{% macro pagination(page, has_next) %}
+  {% if page > 1 or has_next %}
+    <div class="pagination">
+      {% if page > 1 %}<a class="btn" href="{{ page_url(page - 1) }}">&larr; Previous</a>{% endif %}
+      <span class="muted">Page {{ page }}</span>
+      {% if has_next %}<a class="btn" href="{{ page_url(page + 1) }}">Next &rarr;</a>{% endif %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{# 5 item rows for the order and PO forms. No JavaScript: empty rows are ignored. #}
+{% macro item_rows(products, form, with_cost=false, rows=5) %}
+  <table class="table item-rows">
+    <thead>
+      <tr><th>#</th><th>Product</th><th class="num">Quantity</th>
+        {% if with_cost %}<th class="num">Unit cost (blank = cost price)</th>{% endif %}</tr>
+    </thead>
+    <tbody>
+      {% for n in range(1, rows + 1) %}
+        {% set chosen = form.get('product_' ~ n, '')|string %}
+        <tr>
+          <td class="muted">{{ n }}</td>
+          <td>
+            <select name="product_{{ n }}" aria-label="Product {{ n }}">
+              <option value="">-- none --</option>
+              {% for p in products %}
+                <option value="{{ p.product_id }}" {{ 'selected' if chosen == p.product_id|string }}>
+                  {{ p.name }} ({{ p.sku }})
+                  {% if p.available is not none %} · {{ p.available }} available{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class="num"><input type="number" name="qty_{{ n }}" min="1" class="input-small"
+                                 aria-label="Quantity {{ n }}" value="{{ form.get('qty_' ~ n, '') }}"></td>
+          {% if with_cost %}
+            <td class="num"><input type="number" name="cost_{{ n }}" min="0" step="0.01" class="input-small"
+                                   aria-label="Unit cost {{ n }}" value="{{ form.get('cost_' ~ n, '') }}"></td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, pagination %}
+{% block title %}Products{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Products</h1>
+    {% if session.role == 'ADMIN' %}<a class="btn btn-primary" href="{{ url_for('products.product_form') }}">Add product</a>{% endif %}</div>
+  <form method="get" class="filters">
+    <label>Search <input name="q" value="{{ request.args.get('q', '') }}" placeholder="name or SKU"></label>
+    <label>Category
+      <select name="category_id"><option value="">All</option>
+        {% for c in categories %}<option value="{{ c.category_id }}"
+          {{ 'selected' if request.args.get('category_id') == c.category_id|string }}>{{ c.name }}</option>{% endfor %}
+      </select></label>
+    <button class="btn">Apply</button>
+  </form>
+  {% if products %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>SKU</th><th>Name</th><th>Category</th><th class="num">Price</th><th class="num">Cost</th>
+        <th class="num">Reorder level</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for p in products %}
+        <tr class="{{ 'row-inactive' if not p.is_active }}">
+          <td>{{ p.sku }}</td><td>{{ p.name }}</td><td>{{ p.category_name }}</td>
+          <td class="num">{{ p.unit_price|money }}</td><td class="num">{{ p.cost_price|money }}</td>
+          <td class="num">{{ p.reorder_level }}</td><td>{{ badge('ACTIVE' if p.is_active else 'INACTIVE') }}</td>
+          <td class="links"><a href="{{ url_for('stock.product_history', product_id=p.product_id) }}">History</a>
+            {% if session.role == 'ADMIN' %}
+              <a href="{{ url_for('products.product_form', product_id=p.product_id) }}">Edit</a>
+              <a href="{{ url_for('products.toggle_product', product_id=p.product_id) }}">{{ 'Deactivate' if p.is_active else 'Activate' }}</a>
+            {% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {{ pagination(page, has_next) }}
+  {% else %}<p class="empty">No products found.</p>{% endif %}
+{% endblock %}

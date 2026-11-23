@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, item_rows %}
+{% block title %}Order #{{ order.order_id }}{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <h1>Order #{{ order.order_id }} {{ badge(order.status) }}</h1>
+    <a class="btn" href="{{ url_for('orders.list_orders') }}">All orders</a>
+  </div>
+
+  <div class="card">
+    <dl class="facts">
+      <dt>Customer</dt><dd>{{ order.customer_name }}</dd>
+      <dt>Warehouse</dt><dd>{{ order.warehouse_name }}</dd>
+      <dt>Ordered</dt><dd>{{ order.order_date|show_date }}</dd>
+      <dt>Shipped</dt><dd>{{ order.shipped_date|show_date }}</dd>
+    </dl>
+
+    <table class="table">
+      <thead><tr><th>Product</th><th>SKU</th><th class="num">Qty</th><th class="num">Unit price</th>
+        <th class="num">Line total</th>
+        {% if order.status == 'PENDING' %}<th class="num">Available now</th>{% endif %}</tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr class="{{ 'row-warning' if order.status == 'PENDING' and i.available < i.quantity }}">
+          <td><a href="{{ url_for('stock.product_history', product_id=i.product_id) }}">{{ i.name }}</a></td>
+          <td>{{ i.sku }}</td><td class="num">{{ i.quantity }}</td>
+          <td class="num">{{ i.unit_price|money }}</td><td class="num">{{ i.line_total|money }}</td>
+          {% if order.status == 'PENDING' %}<td class="num">{{ i.available }}</td>{% endif %}</tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="4" class="num">Total</th><th class="num">{{ order.total_amount|money }}</th>
+        {% if order.status == 'PENDING' %}<th></th>{% endif %}</tr></tfoot>
+    </table>
+
+    {# Buttons appear only when that action is allowed. The database checks again anyway. #}
+    <div class="actions">
+      {% if order.status == 'PENDING' %}
+        <form method="post" action="{{ url_for('orders.confirm', order_id=order.order_id) }}">
+          <button class="btn btn-primary">Confirm order (reserve stock)</button></form>
+        <a class="btn btn-danger" href="{{ url_for('orders.cancel', order_id=order.order_id) }}">Cancel order</a>
+        <a class="btn btn-danger" href="{{ url_for('orders.delete', order_id=order.order_id) }}">Delete order</a>
+      {% elif order.status == 'CONFIRMED' %}
+        <form method="post" action="{{ url_for('orders.ship', order_id=order.order_id) }}">
+          <button class="btn btn-primary">Ship order (deduct stock)</button></form>
+        <a class="btn btn-danger" href="{{ url_for('orders.cancel', order_id=order.order_id) }}">Cancel order</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if order.status == 'PENDING' %}
+    <form method="post" action="{{ url_for('orders.add_items', order_id=order.order_id) }}" class="card">
+      <h2>Add more items</h2>
+      <p class="muted">Numbers show what is available in {{ order.warehouse_name }} right now.</p>
+      {{ item_rows(products, {}) }}
+      <button class="btn">Add items</button>
+    </form>
+  {% endif %}
+{% endblock %}

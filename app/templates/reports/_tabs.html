@@ -1,0 +1,7 @@
+<div class="page-head"><h1>Reports</h1></div>
+<div class="tabs">
+  <a href="{{ url_for('reports.low_stock') }}" class="{{ 'active' if tab == 'low' }}">Low stock</a>
+  <a href="{{ url_for('reports.suppliers') }}" class="{{ 'active' if tab == 'suppliers' }}">Supplier summary</a>
+  <a href="{{ url_for('reports.best_sellers') }}" class="{{ 'active' if tab == 'best' }}">Best sellers</a>
+  <a href="{{ url_for('reports.daily_sales') }}" class="{{ 'active' if tab == 'daily' }}">Daily sales</a>
+</div>

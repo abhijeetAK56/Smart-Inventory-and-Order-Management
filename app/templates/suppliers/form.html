@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Supplier{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>{{ 'Edit' if supplier_id else 'Add' }} supplier</h1></div>
+  <form method="post" class="card narrow">
+    <div class="form-row"><label for="name">Name</label>
+      <input id="name" name="name" required maxlength="100" value="{{ item.name or '' }}"></div>
+    <div class="form-row"><label for="contact_person">Contact person</label>
+      <input id="contact_person" name="contact_person" maxlength="100" value="{{ item.contact_person or '' }}"></div>
+    <div class="form-row"><label for="email">Email</label>
+      <input id="email" name="email" type="email" maxlength="120" value="{{ item.email or '' }}"></div>
+    <div class="form-grid">
+      <div class="form-row"><label for="phone">Phone</label>
+        <input id="phone" name="phone" maxlength="20" value="{{ item.phone or '' }}"></div>
+      <div class="form-row"><label for="city">City</label>
+        <input id="city" name="city" maxlength="60" value="{{ item.city or '' }}"></div>
+    </div>
+    <label class="checkbox"><input type="checkbox" name="is_active" {{ 'checked' if item.is_active }}> Active</label>
+    <div class="actions"><button class="btn btn-primary">Save</button>
+      <a class="btn" href="{{ url_for('masters.suppliers') }}">Back</a></div>
+  </form>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Rebuild check{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Rebuild stock from the ledger</h1></div>
+  <p class="muted">Stock is the sum of all movements. This page adds them up again
+    (stored procedure <code>sp_stock_as_of</code>) and compares with the stored number.</p>
+
+  <div class="flash {{ 'flash-success' if mismatch_count == 0 else 'flash-error' }}">
+    {{ mismatch_count }} mismatches between stored stock and the ledger
+    (view <code>v_stock_reconciliation</code>).
+  </div>
+
+  <form method="get" class="filters">
+    <label>Stock as of <input type="datetime-local" name="as_of" value="{{ as_of or '' }}"></label>
+    <button class="btn">Rebuild</button>
+    {% if as_of %}<a class="btn" href="{{ url_for('stock.rebuild') }}">Back to now</a>{% endif %}
+  </form>
+
+  <p class="muted">{{ 'Stock as it was on ' ~ as_of.replace('T', ' ') if as_of else 'Stock right now' }}
+    · {{ rows|length }} rows</p>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>SKU</th><th>Product</th><th>Warehouse</th><th class="num">Rebuilt from ledger</th>
+      {% if not as_of %}<th class="num">Stored</th><th class="num">Difference</th>{% endif %}</tr></thead>
+    <tbody>
+    {% for r in rows %}
+      {% set stored_qty = stored.get((r.product_id, r.warehouse_id)) %}
+      <tr class="{{ 'row-danger' if not as_of and stored_qty != r.rebuilt_qty }}">
+        <td>{{ r.sku }}</td><td>{{ r.product_name }}</td><td>{{ r.warehouse_name }}</td>
+        <td class="num">{{ r.rebuilt_qty }}</td>
+        {% if not as_of %}<td class="num">{{ stored_qty }}</td>
+          <td class="num">{{ (stored_qty or 0) - r.rebuilt_qty }}</td>{% endif %}</tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+{% endblock %}

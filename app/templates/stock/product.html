@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_macros.html" import qty %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <h1>{{ product.name }} <span class="muted">{{ product.sku }}</span></h1>
+    <a class="btn" href="{{ url_for('stock.levels') }}">Stock levels</a>
+  </div>
+  <p class="muted">{{ product.category_name }} · reorder level {{ product.reorder_level }}
+    {% if not product.is_active %} · <strong>inactive</strong>{% endif %}</p>
+
+  <h2>Stored stock vs stock rebuilt from the ledger</h2>
+  <div class="stats">
+    {% for c in checks %}
+      <div class="stat-card {{ 'stat-ok' if c.quantity_on_hand == c.rebuilt_qty else 'stat-bad' }}">
+        <strong>{{ c.warehouse_name }}</strong>
+        <span>Stored: {{ c.quantity_on_hand }} | Rebuilt from ledger: {{ c.rebuilt_qty }}</span>
+        <span>{{ 'Match ✓' if c.quantity_on_hand == c.rebuilt_qty else 'MISMATCH ✗' }}</span>
+        <span class="muted">Reserved: {{ c.quantity_reserved }} · Available: {{ c.quantity_on_hand - c.quantity_reserved }}</span>
+      </div>
+    {% else %}<p class="empty">This product has no stock yet.</p>{% endfor %}
+  </div>
+
+  <h2>Movement history</h2>
+  <p class="muted">"Balance" is a running total per warehouse, calculated with the window function
+    <code>SUM(change_qty) OVER (PARTITION BY warehouse_id ORDER BY created_at)</code>.</p>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Time</th><th>Warehouse</th><th>Type</th><th class="num">Change</th>
+      <th class="num">Balance</th><th>Reference</th><th>By</th><th>Note</th></tr></thead>
+    <tbody>
+    {% for m in movements %}
+      <tr><td>{{ m.created_at|show_date }}</td><td>{{ m.warehouse_name }}</td><td>{{ m.movement_type }}</td>
+        <td class="num">{{ qty(m.change_qty) }}</td><td class="num">{{ m.balance }}</td>
+        <td>{% include "stock/_reference.html" %}</td><td>{{ m.username }}</td><td>{{ m.note or '' }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+{% endblock %}

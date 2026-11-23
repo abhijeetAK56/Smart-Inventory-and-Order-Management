@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Daily sales{% endblock %}
+{% block content %}
+  {% include "reports/_tabs.html" %}
+  <p class="muted">From view <code>v_daily_sales</code>. The bars are plain HTML <code>&lt;progress&gt;</code> elements (no JavaScript).</p>
+  <form method="get" class="filters">
+    <label>From <input type="date" name="date_from" value="{{ date_from }}"></label>
+    <label>To <input type="date" name="date_to" value="{{ date_to }}"></label>
+    <button class="btn">Apply</button>
+  </form>
+  {% if rows %}
+    <p><strong>Total: {{ total|money }}</strong> over {{ rows|length }} days with sales</p>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Date</th><th class="num">Orders shipped</th><th class="num">Revenue</th><th>Compared to best day</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr><td>{{ r.sale_date|show_date }}</td><td class="num">{{ r.orders_shipped }}</td>
+          <td class="num">{{ r.revenue|money }}</td>
+          <td><progress max="{{ biggest }}" value="{{ r.revenue }}">{{ r.revenue }}</progress></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  {% else %}<p class="empty">No sales in this date range.</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Suppliers{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Suppliers</h1>
+    {% if session.role == 'ADMIN' %}<a class="btn btn-primary" href="{{ url_for('masters.supplier_form') }}">Add supplier</a>{% endif %}</div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Name</th><th>Contact</th><th>Email</th><th>Phone</th><th>City</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for s in suppliers %}
+      <tr class="{{ 'row-inactive' if not s.is_active }}"><td>{{ s.name }}</td><td>{{ s.contact_person or '' }}</td>
+        <td>{{ s.email or '' }}</td><td>{{ s.phone or '' }}</td><td>{{ s.city or '' }}</td>
+        <td>{{ badge('ACTIVE' if s.is_active else 'INACTIVE') }}</td>
+        <td>{% if session.role == 'ADMIN' %}<a href="{{ url_for('masters.supplier_form', supplier_id=s.supplier_id) }}">Edit</a>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="7" class="empty">No suppliers yet.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+{% endblock %}

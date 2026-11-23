@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in · StockFlow</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+  <form method="post" class="card login-card">
+    <h1>StockFlow</h1>
+    <p class="muted">Smart inventory and order management</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <div class="form-row">
+      <label for="username">Username</label>
+      <input id="username" name="username" required autofocus>
+    </div>
+    <div class="form-row">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required>
+    </div>
+    <button class="btn btn-primary btn-full">Log in</button>
+  </form>
+</body>
+</html>

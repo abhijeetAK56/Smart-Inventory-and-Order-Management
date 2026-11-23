@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import item_rows %}
+{% block title %}New purchase order{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>New purchase order</h1></div>
+  <form method="post" class="card">
+    <div class="form-grid">
+      <div class="form-row">
+        <label for="supplier_id">Supplier</label>
+        <select id="supplier_id" name="supplier_id" required>
+          <option value="">-- pick a supplier --</option>
+          {% for s in suppliers %}<option value="{{ s.supplier_id }}"
+            {{ 'selected' if form.get('supplier_id') == s.supplier_id|string }}>{{ s.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="warehouse_id">Deliver to warehouse</label>
+        <select id="warehouse_id" name="warehouse_id" required>
+          <option value="">-- pick a warehouse --</option>
+          {% for w in warehouses %}<option value="{{ w.warehouse_id }}"
+            {{ 'selected' if form.get('warehouse_id') == w.warehouse_id|string }}>{{ w.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <h2>Items</h2>
+    {{ item_rows(products, form, with_cost=true) }}
+    <div class="actions">
+      <button class="btn btn-primary">Save as draft</button>
+      <a class="btn" href="{{ url_for('purchases.list_pos') }}">Back</a>
+    </div>
+  </form>
+{% endblock %}

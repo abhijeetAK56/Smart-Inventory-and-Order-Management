@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Alerts{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Reorder alerts</h1></div>
+  <p class="muted">Alerts are created and resolved automatically by the database
+    (triggers <code>trg_stock_alert_ins</code> and <code>trg_stock_alert_upd</code>).</p>
+  <div class="tabs">
+    <a href="{{ url_for('dashboard.alerts') }}" class="{{ 'active' if status == 'OPEN' }}">Open</a>
+    <a href="{{ url_for('dashboard.alerts', status='RESOLVED') }}" class="{{ 'active' if status == 'RESOLVED' }}">Resolved</a>
+  </div>
+  {% if alerts %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Product</th><th>Warehouse</th><th class="num">Available at alert</th>
+        <th class="num">Reorder level</th><th>Raised at</th><th>Resolved at</th></tr></thead>
+      <tbody>
+      {% for a in alerts %}
+        <tr><td><a href="{{ url_for('stock.product_history', product_id=a.product_id) }}">{{ a.product_name }}</a>
+              <span class="muted">{{ a.sku }}</span></td>
+          <td>{{ a.warehouse_name }}</td><td class="num">{{ a.available_at_alert }}</td>
+          <td class="num">{{ a.reorder_level_at_alert }}</td><td>{{ a.created_at|show_date }}</td>
+          <td>{{ a.resolved_at|show_date }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  {% else %}<p class="empty">No {{ status|lower }} alerts.</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Categories{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Categories</h1>
+    <a class="btn btn-primary" href="{{ url_for('masters.category_form') }}">Add category</a></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Name</th><th>Description</th><th class="num">Products</th><th></th></tr></thead>
+    <tbody>
+    {% for c in categories %}
+      <tr><td>{{ c.name }}</td><td>{{ c.description or '' }}</td><td class="num">{{ c.product_count }}</td>
+        <td><a href="{{ url_for('masters.category_form', category_id=c.category_id) }}">Edit</a></td></tr>
+    {% else %}<tr><td colspan="4" class="empty">No categories yet.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if product_id else 'Add' }} product{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>{{ 'Edit' if product_id else 'Add' }} product</h1></div>
+  <form method="post" class="card narrow">
+    <div class="form-row"><label for="sku">SKU (unique code)</label>
+      <input id="sku" name="sku" required maxlength="30" value="{{ item.sku or '' }}"></div>
+    <div class="form-row"><label for="name">Name</label>
+      <input id="name" name="name" required maxlength="120" value="{{ item.name or '' }}"></div>
+    <div class="form-row"><label for="category_id">Category</label>
+      <select id="category_id" name="category_id" required><option value="">-- pick --</option>
+        {% for c in categories %}<option value="{{ c.category_id }}"
+          {{ 'selected' if item.category_id|string == c.category_id|string }}>{{ c.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-row"><label for="default_supplier_id">Default supplier (optional)</label>
+      <select id="default_supplier_id" name="default_supplier_id"><option value="">-- none --</option>
+        {% for s in suppliers %}<option value="{{ s.supplier_id }}"
+          {{ 'selected' if item.default_supplier_id|string == s.supplier_id|string }}>{{ s.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-grid">
+      <div class="form-row"><label for="unit_price">Selling price (₹)</label>
+        <input id="unit_price" name="unit_price" type="number" step="0.01" min="0" required value="{{ item.unit_price or '' }}"></div>
+      <div class="form-row"><label for="cost_price">Cost price (₹)</label>
+        <input id="cost_price" name="cost_price" type="number" step="0.01" min="0" required value="{{ item.cost_price or '' }}"></div>
+    </div>
+    <div class="form-row"><label for="reorder_level">Reorder level (alert when available is at or below this)</label>
+      <input id="reorder_level" name="reorder_level" type="number" min="0" required value="{{ item.reorder_level if item.reorder_level is not none else '' }}"></div>
+    <p class="muted">A new product starts with no stock. Add stock with a purchase order
+      (or an admin adjustment).</p>
+    <div class="actions"><button class="btn btn-primary">Save</button>
+      <a class="btn" href="{{ url_for('products.list_products') }}">Back</a></div>
+  </form>
+{% endblock %}

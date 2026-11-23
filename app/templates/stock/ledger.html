@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import qty, pagination %}
+{% block title %}Ledger{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Stock ledger</h1></div>
+  <p class="muted">Every stock change, newest first. Rows can only be added, never edited or deleted.</p>
+
+  <form method="get" class="filters">
+    <label>Product
+      <select name="product_id"><option value="">All</option>
+        {% for p in products %}<option value="{{ p.product_id }}"
+          {{ 'selected' if request.args.get('product_id') == p.product_id|string }}>{{ p.sku }} {{ p.name }}</option>{% endfor %}
+      </select></label>
+    <label>Warehouse
+      <select name="warehouse_id"><option value="">All</option>
+        {% for w in warehouses %}<option value="{{ w.warehouse_id }}"
+          {{ 'selected' if request.args.get('warehouse_id') == w.warehouse_id|string }}>{{ w.name }}</option>{% endfor %}
+      </select></label>
+    <label>Type
+      <select name="movement_type"><option value="">All</option>
+        {% for t in movement_types %}<option {{ 'selected' if request.args.get('movement_type') == t }}>{{ t }}</option>{% endfor %}
+      </select></label>
+    <label>From <input type="date" name="date_from" value="{{ date_from }}"></label>
+    <label>To <input type="date" name="date_to" value="{{ date_to }}"></label>
+    <button class="btn">Apply</button>
+  </form>
+
+  {% if movements %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Time</th><th>Product</th><th>Warehouse</th><th>Type</th><th class="num">Change</th>
+        <th>Reference</th><th>By</th><th>Note</th></tr></thead>
+      <tbody>
+      {% for m in movements %}
+        <tr><td>{{ m.created_at|show_date }}</td>
+          <td><a href="{{ url_for('stock.product_history', product_id=m.product_id) }}">{{ m.product_name }}</a></td>
+          <td>{{ m.warehouse_name }}</td><td>{{ m.movement_type }}</td><td class="num">{{ qty(m.change_qty) }}</td>
+          <td>{% include "stock/_reference.html" %}</td><td>{{ m.username }}</td><td>{{ m.note or '' }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {{ pagination(page, has_next) }}
+  {% else %}<p class="empty">No movements match these filters.</p>{% endif %}
+{% endblock %}

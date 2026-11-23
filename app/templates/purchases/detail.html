@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}PO #{{ po.po_id }}{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <h1>Purchase order #{{ po.po_id }} {{ badge(po.status) }}</h1>
+    <a class="btn" href="{{ url_for('purchases.list_pos') }}">All purchase orders</a>
+  </div>
+  <div class="card">
+    <dl class="facts">
+      <dt>Supplier</dt><dd>{{ po.supplier_name }}</dd>
+      <dt>Warehouse</dt><dd>{{ po.warehouse_name }}</dd>
+      <dt>Created</dt><dd>{{ po.order_date|show_date }} by {{ po.username }}</dd>
+      <dt>Received</dt><dd>{{ po.received_date|show_date }}</dd>
+    </dl>
+    <table class="table">
+      <thead><tr><th>Product</th><th>SKU</th><th class="num">Qty</th><th class="num">Unit cost</th>
+        <th class="num">Line total</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr><td>{{ i.name }}</td><td>{{ i.sku }}</td><td class="num">{{ i.quantity }}</td>
+          <td class="num">{{ i.unit_cost|money }}</td><td class="num">{{ i.line_total|money }}</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="4" class="num">Total</th><th class="num">{{ total|money }}</th></tr></tfoot>
+    </table>
+    <div class="actions">
+      {% if po.status == 'DRAFT' %}
+        <form method="post" action="{{ url_for('purchases.mark_ordered', po_id=po.po_id) }}">
+          <button class="btn btn-primary">Mark as ordered</button></form>
+      {% elif po.status == 'ORDERED' %}
+        <form method="post" action="{{ url_for('purchases.receive', po_id=po.po_id) }}">
+          <button class="btn btn-primary">Receive stock</button></form>
+      {% endif %}
+      {% if po.status in ('DRAFT', 'ORDERED') %}
+        <a class="btn btn-danger" href="{{ url_for('purchases.cancel', po_id=po.po_id) }}">Cancel PO</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

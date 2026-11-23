@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Supplier summary{% endblock %}
+{% block content %}
+  {% include "reports/_tabs.html" %}
+  <p class="muted">From view <code>v_supplier_purchase_summary</code>: received purchase orders per supplier per month.</p>
+  <form method="get" class="filters">
+    <label>From month <input type="month" name="month_from" value="{{ month_from }}"></label>
+    <label>To month <input type="month" name="month_to" value="{{ month_to }}"></label>
+    <button class="btn">Apply</button>
+  </form>
+  {% if rows %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Month</th><th>Supplier</th><th class="num">POs</th><th class="num">Units</th><th class="num">Value</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr><td>{{ r.month }}</td><td>{{ r.supplier_name }}</td><td class="num">{{ r.po_count }}</td>
+          <td class="num">{{ r.total_quantity }}</td><td class="num">{{ r.total_value|money }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  {% else %}<p class="empty">No received purchase orders in this range.</p>{% endif %}
+{% endblock %}

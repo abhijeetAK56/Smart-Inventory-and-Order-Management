@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Adjust stock{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>Adjust stock</h1></div>
+  <form method="post" class="card narrow">
+    <input type="hidden" name="product_id" value="{{ row.product_id }}">
+    <input type="hidden" name="warehouse_id" value="{{ row.warehouse_id }}">
+    <dl class="facts">
+      <dt>Product</dt><dd>{{ row.product_name }} ({{ row.sku }})</dd>
+      <dt>Warehouse</dt><dd>{{ row.warehouse_name }}</dd>
+      <dt>On hand / reserved / available</dt>
+      <dd>{{ row.quantity_on_hand }} / {{ row.quantity_reserved }} / <strong>{{ row.available }}</strong></dd>
+    </dl>
+    <div class="form-row">
+      <label for="change">Change (use a minus sign to remove, for example -2)</label>
+      <input id="change" name="change" type="number" required value="{{ request.form.get('change', '') }}">
+    </div>
+    <div class="form-row">
+      <label for="note">Reason (at least 5 characters)</label>
+      <input id="note" name="note" required minlength="5" value="{{ request.form.get('note', '') }}">
+    </div>
+    <p class="muted">This adds a new ADJUSTMENT entry to the ledger. It cannot be undone,
+      only corrected with another adjustment.</p>
+    <div class="actions">
+      <button class="btn btn-danger">Save adjustment</button>
+      <a class="btn" href="{{ url_for('stock.levels') }}">Back</a>
+    </div>
+  </form>
+{% endblock %}

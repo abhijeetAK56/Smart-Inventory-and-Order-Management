@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "_macros.html" import item_rows %}
+{% block title %}New order{% endblock %}
+{% block content %}
+  <div class="page-head"><h1>New customer order</h1></div>
+  <form method="post" class="card">
+    <div class="form-grid">
+      <div class="form-row">
+        <label for="customer_id">Customer</label>
+        <select id="customer_id" name="customer_id" required>
+          <option value="">-- pick a customer --</option>
+          {% for c in customers %}<option value="{{ c.customer_id }}"
+            {{ 'selected' if form.get('customer_id') == c.customer_id|string }}>{{ c.name }} ({{ c.city or '-' }})</option>{% endfor %}
+        </select>
+        <a class="small" href="{{ url_for('masters.customer_form') }}">+ Add a new customer</a>
+      </div>
+      <div class="form-row">
+        <label for="warehouse_id">Ship from warehouse</label>
+        <select id="warehouse_id" name="warehouse_id" required>
+          <option value="">-- pick a warehouse --</option>
+          {% for w in warehouses %}<option value="{{ w.warehouse_id }}"
+            {{ 'selected' if form.get('warehouse_id') == w.warehouse_id|string }}>{{ w.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <h2>Items</h2>
+    <p class="muted">Fill as many rows as you need. Empty rows are ignored.
+      You can add more items after saving.</p>
+    {{ item_rows(products, form) }}
+    <div class="actions">
+      <button class="btn btn-primary">Save as pending</button>
+      <a class="btn" href="{{ url_for('orders.list_orders') }}">Back</a>
+    </div>
+  </form>
+{% endblock %}
